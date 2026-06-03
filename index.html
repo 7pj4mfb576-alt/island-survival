@@ -1,68 +1,159 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Island Survival</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Island Survival RPG</title>
 <style>
 body{
-  margin:0;
-  background:#1f5f2e;
-  color:white;
-  font-family:Arial;
-  text-align:center;
+margin:0;
+background:#222;
+font-family:Arial;
+color:white;
+text-align:center;
 }
 #stats{
-  padding:10px;
-  background:#111;
+background:#111;
+padding:8px;
+font-size:16px;
+}
+canvas{
+background:#3d7a3d;
+display:block;
+margin:auto;
+touch-action:none;
 }
 button{
-  font-size:18px;
-  padding:10px;
-  margin:5px;
+font-size:18px;
+padding:10px;
+margin:5px;
 }
 </style>
 </head>
 <body>
 
-<div id="stats">
-Level 1 | HP 100 | Kills 0
+<div id="stats">Loading...</div>
+
+<canvas id="game" width="360" height="500"></canvas>
+
+<div>
+<button onclick="attack()">Attack</button>
+<button onclick="upgrade()">Upgrade Weapon</button>
 </div>
 
-<h2>Island Survival RPG V2 TEST</h2>
-
-<p>You have landed on a dangerous island.</p>
-
-<button onclick="hunt()">Hunt</button>
-<button onclick="rest()">Rest</button>
-
-<p id="log">Find food and survive.</p>
-
 <script>
-let hp = 100;
-let kills = 0;
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
 
-function hunt(){
-  if(Math.random() < 0.5){
-    kills++;
-    document.getElementById("log").innerText =
-      "You killed a deer.";
-  } else {
-    hp -= 10;
-    document.getElementById("log").innerText =
-      "A wolf injured you.";
-  }
+let player={
+x:180,
+y:250,
+hp:100,
+xp:0,
+level:1,
+weapon:1,
+kills:0
+};
 
-  document.getElementById("stats").innerText =
-    "Level 1 | HP " + hp + " | Kills " + kills;
+let tx=180;
+let ty=250;
+
+let wolves=[];
+
+for(let i=0;i<5;i++){
+wolves.push({
+x:Math.random()*340+10,
+y:Math.random()*480+10,
+hp:20
+});
 }
 
-function rest(){
-  hp = Math.min(100, hp + 20);
-  document.getElementById("log").innerText =
-    "You rested at camp.";
-  document.getElementById("stats").innerText =
-    "Level 1 | HP " + hp + " | Kills " + kills;
+canvas.addEventListener("touchstart",e=>{
+const r=canvas.getBoundingClientRect();
+tx=e.touches[0].clientX-r.left;
+ty=e.touches[0].clientY-r.top;
+});
+
+function attack(){
+for(let i=wolves.length-1;i>=0;i--){
+let w=wolves[i];
+let d=Math.hypot(player.x-w.x,player.y-w.y);
+
+if(d<40){
+w.hp-=10*player.weapon;
+
+if(w.hp<=0){
+wolves.splice(i,1);
+
+wolves.push({
+x:Math.random()*340+10,
+y:Math.random()*480+10,
+hp:20
+});
+
+player.kills++;
+player.xp+=10;
+
+if(player.xp>=50){
+player.level++;
+player.xp=0;
+player.hp=100;
 }
+}
+}
+}
+}
+
+function upgrade(){
+let cost=player.weapon*3;
+
+if(player.kills>=cost){
+player.kills-=cost;
+player.weapon++;
+}
+}
+
+function draw(){
+
+player.x+=(tx-player.x)*0.08;
+player.y+=(ty-player.y)*0.08;
+
+ctx.clearRect(0,0,360,500);
+
+ctx.fillStyle="blue";
+ctx.beginPath();
+ctx.arc(player.x,player.y,12,0,Math.PI*2);
+ctx.fill();
+
+for(let w of wolves){
+
+let d=Math.hypot(player.x-w.x,player.y-w.y);
+
+if(d<150){
+w.x+=(player.x-w.x)*0.01;
+w.y+=(player.y-w.y)*0.01;
+}
+
+if(d<18){
+player.hp-=0.05;
+}
+
+ctx.fillStyle="red";
+ctx.beginPath();
+ctx.arc(w.x,w.y,10,0,Math.PI*2);
+ctx.fill();
+}
+
+document.getElementById("stats").innerText=
+"HP "+Math.floor(player.hp)+
+" | LVL "+player.level+
+" | XP "+player.xp+
+" | Weapon "+player.weapon+
+" | Kills "+player.kills;
+
+requestAnimationFrame(draw);
+}
+
+draw();
 </script>
 
 </body>
