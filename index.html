@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Island Survival</title>
+<style>
+body{
+  margin:0;
+  background:#1f5f2e;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+}
+#stats{
+  padding:10px;
+  background:#111;
+}
+button{
+  font-size:18px;
+  padding:10px;
+  margin:5px;
+}
+</style>
+</head>
+<body>
+
+<div id="stats">
+Level 1 | HP 100 | Kills 0
+</div>
+
+<h2>Island Survival RPG</h2>
+
+<p>You have landed on a dangerous island.</p>
+
+<button onclick="hunt()">Hunt</button>
+<button onclick="rest()">Rest</button>
+
+<p id="log">Find food and survive.</p>
+
+<script>
+let hp = 100;
+let kills = 0;
+
+function hunt(){
+  if(Math.random() < 0.5){
+    kills++;
+    document.getElementById("log").innerText =
+      "You killed a deer.";
+  } else {
+    hp -= 10;
+    document.getElementById("log").innerText =
+      "A wolf injured you.";
+  }
+
+  document.getElementById("stats").innerText =
+    "Level 1 | HP " + hp + " | Kills " + kills;
+}
+
+function rest(){
+  hp = Math.min(100, hp + 20);
+  document.getElementById("log").innerText =
+    "You rested at camp.";
+  document.getElementById("stats").innerText =
+    "Level 1 | HP " + hp + " | Kills " + kills;
+}
+</script>
+
+</body>
+</html>
